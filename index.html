@@ -3,26 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <title>Guia Turístico</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
 <style>
 /* =============================== */
-/* PALETA DARK */
+/* PALETA DARK E ESTILO GERAL */
 /* =============================== */
-:root{
+:root {
   --bg:#0d1117;
   --card:#161b22;
-  --card-hover:#1e2734;
+  --highlight:#1f6feb;
   --text:#e6edf3;
-  --muted:#8b949e;
-  --primary:#1f6feb;
+  --muted:#9aa0a6;
   --radius:18px;
-  --shadow:0 8px 26px rgba(0,0,0,0.35);
+  --shadow:0 10px 35px rgba(0,0,0,.4);
 }
 
-body{
+body {
   margin:0;
   padding:0;
   background:var(--bg);
@@ -30,179 +29,321 @@ body{
   color:var(--text);
 }
 
-/* HEADER */
-header{
-  padding:20px;
+/* =============================== */
+/* BANNER PRINCIPAL */
+/* =============================== */
+.banner {
+  width:100%;
+  height:220px;
+  overflow:hidden;
+  position:relative;
+}
+
+.banner img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  position:absolute;
+  top:0; left:0;
+  opacity:0;
+  transition:opacity 1s ease;
+}
+
+.banner img.active {
+  opacity:1;
+}
+
+/* =============================== */
+/* HEADER E BUSCA */
+/* =============================== */
+header {
+  padding:18px;
   text-align:center;
   background:var(--card);
   box-shadow:var(--shadow);
-  position:sticky;
-  top:0;
-  z-index:100;
 }
 
-/* SEARCH */
-#busca{
-  width:90%;
-  max-width:450px;
+#busca {
+  width:92%;
   padding:12px;
+  margin-top:10px;
+  border-radius:var(--radius);
   background:#21262d;
   border:1px solid #30363d;
-  border-radius:var(--radius);
   color:white;
+  font-size:15px;
 }
 
-/* LISTA */
-#lista{
-  padding:20px;
+/* =============================== */
+/* LISTA DE LUGARES */
+/* =============================== */
+#lista {
+  padding:18px;
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-  gap:25px;
+  gap:20px;
 }
 
 /* CARD */
-.card{
+.card {
   background:var(--card);
+  border-radius:var(--radius);
   padding:15px;
-  border-radius:var(--radius);
   box-shadow:var(--shadow);
-  transition:.3s;
-  opacity:0;
-  transform:translateY(20px);
+  animation:fadeUp .6s ease;
 }
-.card.show{
-  opacity:1;
-  transform:translateY(0);
-}
-.card:hover{ background:var(--card-hover); }
 
-/* THUMB */
-.card img{
+@keyframes fadeUp {
+  from {opacity:0; transform:translateY(20px);}
+  to   {opacity:1; transform:translateY(0);}
+}
+
+/* IMAGEM */
+.card img {
   width:100%;
-  height:180px;
-  border-radius:var(--radius);
+  height:170px;
   object-fit:cover;
+  border-radius:var(--radius);
+  cursor:pointer;
 }
 
 /* TITULO */
-.titulo{
-  font-size:20px;
-  margin:12px 0 5px;
-  font-weight:600;
+.card h3 {
+  margin:10px 0 3px;
 }
 
-.desc{
-  font-size:14px;
-  color:var(--muted);
+/* HASHTAGS */
+.tags {
+  margin:8px 0;
+}
+.tags span {
+  background:#1f2937;
+  padding:5px 10px;
+  margin-right:6px;
+  border-radius:12px;
+  font-size:12px;
+  color:#cbd5e1;
 }
 
 /* BOTÕES */
-.btns{
+.btns {
   margin-top:12px;
   display:flex;
   flex-wrap:wrap;
   gap:10px;
 }
 
-.btn{
+.btn {
   flex:1;
-  padding:10px;
   text-align:center;
-  background:var(--primary);
-  color:white;
+  background:var(--highlight);
+  padding:10px;
   border-radius:var(--radius);
-  text-decoration:none;
+  color:white;
   font-size:14px;
+  text-decoration:none;
 }
 
-/* AVALIAÇÕES */
-.stars{
-  margin:8px 0;
-  color:#f4c430;
+/* =============================== */
+/* TELA DE MÍDIA AMPLIADA */
+/* =============================== */
+#viewer {
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,.95);
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+#viewer img, #viewer video {
+  max-width:90%;
+  max-height:80%;
+  border-radius:var(--radius);
+}
+
+#voltar {
+  margin-top:20px;
+  padding:12px 25px;
+  background:var(--highlight);
+  border-radius:var(--radius);
+  color:white;
+  font-size:16px;
 }
 </style>
 
 </head>
 <body>
 
+<!-- ================================== -->
+<!-- BANNER PRINCIPAL -->
+<!-- ================================== -->
+<div class="banner" id="banner"></div>
+
+<!-- ================================== -->
+<!-- HEADER -->
+<!-- ================================== -->
 <header>
   <h2>🌎 Guia Turístico</h2>
-  <input id="busca" placeholder="Buscar lugares..." oninput="filtrar()">
+  <input id="busca" placeholder="Buscar por lugar ou #hashtag..." oninput="filtrar()">
 </header>
 
+<!-- LISTA DE LUGARES -->
 <div id="lista"></div>
 
+<!-- VIEWER DE FOTOS/VIDEOS -->
+<div id="viewer">
+  <div id="mediaArea"></div>
+  <button id="voltar" onclick="fecharViewer()">Voltar</button>
+</div>
+
 <script>
-// =======================================================
-// VALIDAR LOGIN
-// =======================================================
-if(!localStorage.getItem("GUIA_user") || !localStorage.getItem("GUIA_senha")){
-  location.href = "login.html";
+const API = "URL_DO_GAS_AQUI"; // coloque aqui a URL do seu GAS
+
+let todosLugares = [];
+
+/* ============================
+   CARREGAR BANNERS
+===============================*/
+const bannerImgs = [
+  "https://images.unsplash.com/photo-1549880338-65ddcdfd017b",
+  "https://images.unsplash.com/photo-1505765050516-f72dcac9c60e",
+  "https://images.unsplash.com/photo-1469474968028-56623f02e42e",
+  "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1",
+  "https://images.unsplash.com/photo-1519817650390-64a93db511aa"
+];
+
+function carregarBanners(){
+  const b = document.getElementById("banner");
+  bannerImgs.forEach((url,i)=>{
+    const img = document.createElement("img");
+    img.src = url;
+    if(i===0) img.classList.add("active");
+    b.appendChild(img);
+  });
+
+  let atual = 0;
+  setInterval(()=>{
+    const imgs = document.querySelectorAll(".banner img");
+    imgs[atual].classList.remove("active");
+    atual = (atual+1) % imgs.length;
+    imgs[atual].classList.add("active");
+  }, 3500);
 }
+carregarBanners();
 
-// =======================================================
-// ENDPOINT DO GOOGLE APPS SCRIPT
-// =======================================================
-const API = "https://script.google.com/macros/s/AKfycbzrs7CBEFZ3MKCjAn4GTcw3zAV8ZCEOW8bFJlb5uL3GN8fsGJpO3aa8lEH0cBLkEVDVrg/exec"; // <--- coloque aqui
 
-let dadosOriginais = [];
+/* ============================
+   CARREGAR DADOS
+===============================*/
+async function carregar(){
+  const req = await fetch(API);
+  const data = await req.json();
 
-// =======================================================
-// CARREGAR DADOS DA PLANILHA
-// =======================================================
-async function carregarDados(){
-  const html = document.getElementById("lista");
-  html.innerHTML = `<p style='text-align:center;margin-top:30px;'>Carregando...</p>`;
-
-  const r = await fetch(API);
-  const json = await r.json();
-
-  dadosOriginais = json.lugares;
+  todosLugares = data.lugares;
   render();
 }
-carregarDados();
+carregar();
 
-// =======================================================
-// RENDERIZAR CARDS
-// =======================================================
+/* ============================
+   RENDERIZAR LISTA
+===============================*/
 function render(){
   const lista = document.getElementById("lista");
   lista.innerHTML = "";
 
-  dadosOriginais.forEach((lugar, i)=>{
+  todosLugares.forEach(l=>{
+    const tags = (l.hashtags || "").split(",").map(t=>t.trim()).filter(t=>t);
+
     const card = document.createElement("div");
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${lugar.foto}">
-      <div class="titulo">${lugar.nome}</div>
-      <div class="desc">${lugar.descricao}</div>
+      <img src="${l.foto}" onclick="abrirViewer('${l.foto}','img')">
 
-      <div class="stars">⭐ ${lugar.avaliacao}</div>
+      <h3>${l.nome}</h3>
+      <p style="color:#9ca3af;font-size:14px">${l.descricao}</p>
+
+      <div class="tags">
+        ${tags.map(t=>`<span>#${t}</span>`).join("")}
+      </div>
 
       <div class="btns">
-        <a class="btn" href="${lugar.mapa}" target="_blank">📍 Ver Local</a>
-        <a class="btn" href="${lugar.site}" target="_blank">🌐 Visitar</a>
-        <a class="btn" href="${lugar.reserva}" target="_blank">📅 Reservar</a>
-        <a class="btn" href="https://wa.me/${lugar.whatsapp}" target="_blank">💬 WhatsApp</a>
+        <a class="btn" href="${l.mapa}" target="_blank">📍 Ver Local</a>
+        <a class="btn" href="${l.site}" target="_blank">🌐 Visitar</a>
+        <a class="btn" href="${l.reserva}" target="_blank">📅 Reservar</a>
+        <a class="btn" href="https://wa.me/${l.whatsapp}" target="_blank">💬 WhatsApp</a>
       </div>
     `;
 
-    setTimeout(()=> card.classList.add("show"), 100 * i);
     lista.appendChild(card);
   });
 }
 
-// =======================================================
-// FILTRAR BUSCA
-// =======================================================
+/* ============================
+   FILTRO / BUSCAR / #HASHTAGS
+===============================*/
 function filtrar(){
   const txt = document.getElementById("busca").value.toLowerCase();
-  dadosOriginais = dadosOriginais.filter(l=> 
+
+  const filtrado = todosLugares.filter(l => 
     l.nome.toLowerCase().includes(txt) ||
-    l.descricao.toLowerCase().includes(txt)
+    l.descricao.toLowerCase().includes(txt) ||
+    (l.hashtags || "").toLowerCase().includes(txt.replace("#",""))
   );
-  render();
+
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  filtrado.forEach(l=>{
+    const tags = (l.hashtags || "").split(",").map(t=>t.trim()).filter(t=>t);
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="${l.foto}" onclick="abrirViewer('${l.foto}','img')">
+
+      <h3>${l.nome}</h3>
+      <p style="color:#9ca3af;font-size:14px">${l.descricao}</p>
+
+      <div class="tags">
+        ${tags.map(t=>`<span>#${t}</span>`).join("")}
+      </div>
+
+      <div class="btns">
+        <a class="btn" href="${l.mapa}" target="_blank">📍 Ver Local</a>
+        <a class="btn" href="${l.site}" target="_blank">🌐 Visitar</a>
+        <a class="btn" href="${l.reserva}" target="_blank">📅 Reservar</a>
+        <a class="btn" href="https://wa.me/${l.whatsapp}" target="_blank">💬 WhatsApp</a>
+      </div>
+    `;
+
+    lista.appendChild(card);
+  }); 
+}
+
+/* ============================
+   VIEWER DE MÍDIA
+===============================*/
+function abrirViewer(src, tipo){
+  const media = document.getElementById("mediaArea");
+  media.innerHTML = "";
+
+  if(tipo==="img"){
+    media.innerHTML = `<img src="${src}">`;
+  } else {
+    media.innerHTML = `<video controls src="${src}"></video>`;
+  }
+
+  document.getElementById("viewer").style.display = "flex";
+}
+
+function fecharViewer(){
+  document.getElementById("viewer").style.display = "none";
 }
 </script>
 
