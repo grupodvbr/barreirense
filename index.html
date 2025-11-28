@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Guia Turístico</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* =============================== */
+/* PALETA DARK */
+/* =============================== */
+:root{
+  --bg:#0d1117;
+  --card:#161b22;
+  --card-hover:#1e2734;
+  --text:#e6edf3;
+  --muted:#8b949e;
+  --primary:#1f6feb;
+  --radius:18px;
+  --shadow:0 8px 26px rgba(0,0,0,0.35);
+}
+
+body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  font-family:Inter, sans-serif;
+  color:var(--text);
+}
+
+/* HEADER */
+header{
+  padding:20px;
+  text-align:center;
+  background:var(--card);
+  box-shadow:var(--shadow);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+/* SEARCH */
+#busca{
+  width:90%;
+  max-width:450px;
+  padding:12px;
+  background:#21262d;
+  border:1px solid #30363d;
+  border-radius:var(--radius);
+  color:white;
+}
+
+/* LISTA */
+#lista{
+  padding:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+  gap:25px;
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  padding:15px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  transition:.3s;
+  opacity:0;
+  transform:translateY(20px);
+}
+.card.show{
+  opacity:1;
+  transform:translateY(0);
+}
+.card:hover{ background:var(--card-hover); }
+
+/* THUMB */
+.card img{
+  width:100%;
+  height:180px;
+  border-radius:var(--radius);
+  object-fit:cover;
+}
+
+/* TITULO */
+.titulo{
+  font-size:20px;
+  margin:12px 0 5px;
+  font-weight:600;
+}
+
+.desc{
+  font-size:14px;
+  color:var(--muted);
+}
+
+/* BOTÕES */
+.btns{
+  margin-top:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.btn{
+  flex:1;
+  padding:10px;
+  text-align:center;
+  background:var(--primary);
+  color:white;
+  border-radius:var(--radius);
+  text-decoration:none;
+  font-size:14px;
+}
+
+/* AVALIAÇÕES */
+.stars{
+  margin:8px 0;
+  color:#f4c430;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <h2>🌎 Guia Turístico</h2>
+  <input id="busca" placeholder="Buscar lugares..." oninput="filtrar()">
+</header>
+
+<div id="lista"></div>
+
+<script>
+// =======================================================
+// VALIDAR LOGIN
+// =======================================================
+if(!localStorage.getItem("GUIA_user") || !localStorage.getItem("GUIA_senha")){
+  location.href = "login.html";
+}
+
+// =======================================================
+// ENDPOINT DO GOOGLE APPS SCRIPT
+// =======================================================
+const API = "URL_DO_SEU_WEBAPP_GAS"; // <--- coloque aqui
+
+let dadosOriginais = [];
+
+// =======================================================
+// CARREGAR DADOS DA PLANILHA
+// =======================================================
+async function carregarDados(){
+  const html = document.getElementById("lista");
+  html.innerHTML = `<p style='text-align:center;margin-top:30px;'>Carregando...</p>`;
+
+  const r = await fetch(API);
+  const json = await r.json();
+
+  dadosOriginais = json.lugares;
+  render();
+}
+carregarDados();
+
+// =======================================================
+// RENDERIZAR CARDS
+// =======================================================
+function render(){
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  dadosOriginais.forEach((lugar, i)=>{
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="${lugar.foto}">
+      <div class="titulo">${lugar.nome}</div>
+      <div class="desc">${lugar.descricao}</div>
+
+      <div class="stars">⭐ ${lugar.avaliacao}</div>
+
+      <div class="btns">
+        <a class="btn" href="${lugar.mapa}" target="_blank">📍 Ver Local</a>
+        <a class="btn" href="${lugar.site}" target="_blank">🌐 Visitar</a>
+        <a class="btn" href="${lugar.reserva}" target="_blank">📅 Reservar</a>
+        <a class="btn" href="https://wa.me/${lugar.whatsapp}" target="_blank">💬 WhatsApp</a>
+      </div>
+    `;
+
+    setTimeout(()=> card.classList.add("show"), 100 * i);
+    lista.appendChild(card);
+  });
+}
+
+// =======================================================
+// FILTRAR BUSCA
+// =======================================================
+function filtrar(){
+  const txt = document.getElementById("busca").value.toLowerCase();
+  dadosOriginais = dadosOriginais.filter(l=> 
+    l.nome.toLowerCase().includes(txt) ||
+    l.descricao.toLowerCase().includes(txt)
+  );
+  render();
+}
+</script>
+
+</body>
+</html>
